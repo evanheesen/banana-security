@@ -9,24 +9,25 @@ export const AuthContext = createContext({});
 // Function is jasje voor Provider. Hiermee wikkelen we een component om de basis heen, zodat we meer functies mee kunnen geven.
 function AuthContextProvider({children}) {
 
-    const [isAuth, toggleIsAuth] = useState(false);
+    const [isAuth, toggleIsAuth] = useState([{isAuth: false, user: ""}]);
     const history = useHistory();
 
     function logOut() {
-        toggleIsAuth(!isAuth);
+        toggleIsAuth([{isAuth: false, user: "" }]);
         console.log("Je bent uitgelogd");
         history.push("/")
     }
 
-    function logIn() {
-        toggleIsAuth(!isAuth);
-        console.log("Je bent ingelogd")
+    function logIn(data) {
+        toggleIsAuth([{isAuth: true, user: [data.email] }]);
+        console.log(`Je bent ingelogd met: ${[data.email]}`)
         history.push("/profile");
     }
 
     //4. Data maken die voor iedereen beschikbaar is
     const contextAuth = {
-        isAuth: isAuth,
+        isAuth: isAuth[0].isAuth,
+        user: isAuth[0].user,
         logIn: logIn,
         logOut: logOut,
     }

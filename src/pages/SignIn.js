@@ -6,10 +6,11 @@ import {useForm} from 'react-hook-form';
 function SignIn() {
 
     const { logIn } = useContext(AuthContext);
-    const {handleSubmit} = useForm();
+    const {register, handleSubmit} = useForm();
 
     function onSubmit(data) {
         logIn(data);
+        console.log(data)
     }
 
   return (
@@ -20,16 +21,35 @@ function SignIn() {
       <form
       onSubmit={handleSubmit(onSubmit)}
       >
-        <p>*invoervelden*</p>
-
-          <input></input>
+        <fieldset>
+            <label htmlFor="email">
+                Emailadres:
+                <input
+                    className="inputField"
+                    type="email"
+                    id="email"
+                    {...register("email")}
+                />
+            </label>
+            <label htmlFor="password">
+                Wachtwoord:
+                <input
+                    className="inputField"
+                    type="password"
+                    id="password"
+                    {...register("password")}
+                />
+            </label>
 
         <button
         type="submit"
         label="login-button"
+        value={true}
+        {...register("isAuth")}
         >
             Inloggen
         </button>
+        </fieldset>
       </form>
 
       <p>Heb je nog geen account? <Link to="/signup">Registreer</Link> je dan eerst.</p>
