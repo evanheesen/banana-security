@@ -1,16 +1,28 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import { Link } from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 import {useForm} from 'react-hook-form';
+import axios from "axios";
 
 function SignIn() {
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const { logIn } = useContext(AuthContext);
-    const {register, handleSubmit} = useForm();
 
-    function onSubmit(data) {
-        logIn(data);
-        console.log(data)
+    async function onSubmit(e) {
+        e.preventDefault();
+
+        try {
+            const result = await axios.post('http://localhost:3000/login', {
+                email: email,
+                password: password,
+            });
+            console.log(result.data.accessToken);
+            logIn(result.data.accessToken);
+        } catch(e) {
+            console.error(e);
+        }
     }
 
   return (
@@ -19,7 +31,7 @@ function SignIn() {
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab alias cum debitis dolor dolore fuga id molestias qui quo unde?</p>
 
       <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={onSubmit}
       >
         <fieldset>
             <label htmlFor="email">
@@ -28,7 +40,8 @@ function SignIn() {
                     className="inputField"
                     type="email"
                     id="email"
-                    {...register("email")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                 />
             </label>
             <label htmlFor="password">
@@ -37,15 +50,14 @@ function SignIn() {
                     className="inputField"
                     type="password"
                     id="password"
-                    {...register("password")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
             </label>
 
         <button
         type="submit"
         label="login-button"
-        value={true}
-        {...register("isAuth")}
         >
             Inloggen
         </button>
