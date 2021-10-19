@@ -14,7 +14,7 @@ function AuthContextProvider({children}) {
 
     const [isAuth, toggleIsAuth] = useState({
         isAuth: false,
-        user: {},
+        user: null,
         status: 'pending',
     });
     const history = useHistory();
@@ -23,16 +23,23 @@ function AuthContextProvider({children}) {
     // persist on refresh:
     useEffect(() => {
         const token = localStorage.getItem('token'); // checken of we een token hebben
-        const decodedToken = jwtDecode(token);
-
         console.log("Context wordt gerefresht")
 
-        if (token && validateToken(decodedToken)) { // als er een token is en de token nog niet verlopen is, dan op basis van de gegevens de gebruikersdata ophalen
+        if (token) { // als er een token is dan op basis van de gegevens de gebruikersdata ophalen
+            const decodedToken = jwtDecode(token);
             console.log(decodedToken);
-            getUserData(token, decodedToken);
-        }
+            const validToken = validateToken(decodedToken);
+            console.log(`Valid token: ${validToken}`);
 
-        else { // zo niet, gaan we verder met ons leven
+            if (validToken) { // als de token nog niet verlopen is,
+                getUserData(token, decodedToken);
+            } else {
+                toggleIsAuth({
+                    ...isAuth,
+                    status: 'done',
+                });
+            }
+        } else { // zo niet, gaan we verder met ons leven
             toggleIsAuth({
                 ...isAuth,
                 status: 'done',
@@ -54,7 +61,7 @@ function AuthContextProvider({children}) {
                     }
                 });
 
-            // console.log(result);
+            console.log(result);
 
             toggleIsAuth({
                 ...isAuth,
@@ -67,7 +74,7 @@ function AuthContextProvider({children}) {
                 status: 'done',
             });
 
-            if(pushLink) {
+            if (pushLink) {
                 history.push(pushLink);
             }
 
@@ -106,8 +113,7 @@ function AuthContextProvider({children}) {
     //4. Data maken die voor iedereen beschikbaar is
     const contextAuth = {
         isAuth: isAuth.isAuth,
-        username: isAuth.user.username,
-        email: isAuth.user.email,
+        user: isAuth.user,
         logIn: logIn,
         logOut: logOut,
     }

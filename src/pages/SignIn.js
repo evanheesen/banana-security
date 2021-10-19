@@ -1,7 +1,6 @@
 import React, {useContext, useState} from 'react';
 import { Link } from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
-import {useForm} from 'react-hook-form';
 import axios from "axios";
 
 function SignIn() {
@@ -9,17 +8,24 @@ function SignIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { logIn } = useContext(AuthContext);
+    const source = axios.CancelToken.source();
 
     async function onSubmit(e) {
         e.preventDefault();
 
         try {
             const result = await axios.post('http://localhost:3000/login', {
+                cancelToken: source.token,
                 email: email,
                 password: password,
             });
             console.log(result.data.accessToken);
             logIn(result.data.accessToken);
+
+            return function cleanup() {
+                source.cancel();
+            }
+
         } catch(e) {
             console.error(e);
         }

@@ -4,10 +4,9 @@ function validateToken(decodedToken) {
 
     if (expDateToken > dateNow) {
         return true
-        console.log("true")
+    } else {
+        return false;
     }
-    return false;
-    console.log("false")
 }
 
 export default validateToken;

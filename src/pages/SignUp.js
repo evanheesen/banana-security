@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React from 'react';
 import {Link, useHistory} from 'react-router-dom';
 import {useForm} from "react-hook-form";
 import axios from "axios";
@@ -7,6 +7,7 @@ function SignUp() {
 
     const {register, handleSubmit} = useForm();
     const history = useHistory();
+    const source = axios.CancelToken.source();
 
     async function onSubmit(data) { // wachten op data, dus daarom asynchrome functie
 
@@ -14,12 +15,18 @@ function SignUp() {
 
         try {
             const result = await axios.post('http://localhost:3000/register', {
+                cancelToken: source.token,
                 email: data.email,
                 username: data.username,
                 password: data.password,
             });
             console.log(result)
             history.push("/signin")
+
+            return function cleanup() {
+                source.cancel();
+            }
+
         } catch (e) {
             console.error(e.response.data);
         }
@@ -67,7 +74,6 @@ function SignUp() {
 
                     <button
                         type="submit"
-                        label="register-button"
                         value={true}
                         {...register("isAuth")}
                     >
