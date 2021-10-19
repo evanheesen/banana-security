@@ -2,7 +2,7 @@ import React, {createContext, useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
-// import getUserData from "../helpers/getUserData";
+import validateToken from "../helpers/validateToken";
 
 // 1. Context maken
 export const AuthContext = createContext({});
@@ -23,10 +23,11 @@ function AuthContextProvider({children}) {
     // persist on refresh:
     useEffect(() => {
         const token = localStorage.getItem('token'); // checken of we een token hebben
+        const decodedToken = jwtDecode(token);
+
         console.log("Context wordt gerefresht")
 
-        if (token) { // als er een token is, dan op basis van de gegevens de gebruikersdata ophalen
-            const decodedToken = jwtDecode(token);
+        if (token && validateToken(decodedToken)) { // als er een token is en de token nog niet verlopen is, dan op basis van de gegevens de gebruikersdata ophalen
             console.log(decodedToken);
             getUserData(token, decodedToken);
         }
@@ -53,7 +54,7 @@ function AuthContextProvider({children}) {
                     }
                 });
 
-            console.log(result);
+            // console.log(result);
 
             toggleIsAuth({
                 ...isAuth,
@@ -105,8 +106,8 @@ function AuthContextProvider({children}) {
     //4. Data maken die voor iedereen beschikbaar is
     const contextAuth = {
         isAuth: isAuth.isAuth,
-        email: isAuth.user.email,
         username: isAuth.user.username,
+        email: isAuth.user.email,
         logIn: logIn,
         logOut: logOut,
     }

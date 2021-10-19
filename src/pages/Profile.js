@@ -2,7 +2,6 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 import axios from "axios";
-import jwtDecode from "jwt-decode";
 
 function Profile() {
 
@@ -11,6 +10,7 @@ function Profile() {
         data: {},
     });
 
+    // persist on refresh
     useEffect(() => {
         const token = localStorage.getItem('token'); // checken of we een token hebben
         console.log("Context wordt gerefresht")

@@ -8,7 +8,7 @@ function SignUp() {
     const {register, handleSubmit} = useForm();
     const history = useHistory();
 
-    async function onSubmit(data) {
+    async function onSubmit(data) { // wachten op data, dus daarom asynchrome functie
 
         console.log(data)
 
