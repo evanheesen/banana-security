@@ -1,7 +1,6 @@
 import React, {useContext} from 'react';
 import {Link, useHistory} from 'react-router-dom';
 import {useForm} from "react-hook-form";
-import {AuthContext} from "../context/AuthContext";
 import axios from "axios";
 
 function SignUp() {
@@ -20,7 +19,7 @@ function SignUp() {
                 password: data.password,
             });
             console.log(result)
-            history.push("/profile")
+            history.push("/signin")
         } catch (e) {
             console.error(e.response.data);
         }

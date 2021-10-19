@@ -2,6 +2,7 @@ import React, {createContext, useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
+// import getUserData from "../helpers/getUserData";
 
 // 1. Context maken
 export const AuthContext = createContext({});
@@ -19,35 +20,61 @@ function AuthContextProvider({children}) {
     const history = useHistory();
 
 
+    // persist on refresh:
     useEffect(() => {
-        // checken of we een token hebben
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token'); // checken of we een token hebben
+        console.log("Context wordt gerefresht")
 
-        if (token) {
-            // zo ja, dan op basis van de gegevens de gebruikersdata ophalen
+        if (token) { // als er een token is, dan op basis van de gegevens de gebruikersdata ophalen
+            const decodedToken = jwtDecode(token);
+            console.log(decodedToken);
+            getUserData(token, decodedToken);
+        }
 
-
+        else { // zo niet, gaan we verder met ons leven
             toggleIsAuth({
-                isAuth: true,
-                user: {
-                    email: 'evanheesen@gmail.com',
-                    id: 1,
-                },
-                status: 'done',
-            })
-
-        } else {
-            // zo niet, gaan we verder met ons leven
-            toggleIsAuth( {
                 ...isAuth,
                 status: 'done',
             });
         }
-        console.log(token);
-
-
 
     }, [])
+
+
+    async function getUserData(token, decodedToken, pushLink) {
+        const idUser = decodedToken.sub;
+
+        try {
+            const result = await axios.get(`http://localhost:3000/600/users/${idUser}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+
+            console.log(result);
+
+            toggleIsAuth({
+                ...isAuth,
+                isAuth: true,
+                user: {
+                    email: result.data.email,
+                    id: result.data.id,
+                    username: result.data.username,
+                },
+                status: 'done',
+            });
+
+            if(pushLink) {
+                history.push(pushLink);
+            }
+
+        } catch (e) {
+            console.error(e.response.data);
+        }
+    }
+
 
     function logOut() {
         console.log("Je bent uitgelogd");
@@ -63,49 +90,23 @@ function AuthContextProvider({children}) {
     }
 
 
-    function logIn(JWT) {
-        // JWT in local storage
-        localStorage.setItem('token', JWT);
+    function logIn(token) {
+        localStorage.setItem('token', token); // JWT in local storage
 
-        // Zorgen dat we de gebruikersdata ophalen. Nieuw GET request met decoden JWT.
-        const decodedToken = jwtDecode(JWT);
+        // Zorgen dat we de gebruikersdata ophalen. Nieuw GET request met decoden JWT om gebruikersgegevens op te halen.
+        const decodedToken = jwtDecode(token);
         console.log(decodedToken);
 
-        // GET request om gebruikersgegevens op te halen.
-        async function getUserData(e) {
-            e.preventDefault();
-            const idUser = decodedToken.sub;
+        getUserData(token, decodedToken, "/profile");
 
-            try {
-                const userData = await axios.get(`http://localhost:3000/600/users/${idUser}`,
-                    {"Authorization": "Bearer xxx.xxx.xxx",
-                    });
-
-                console.log(userData);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        // Gebruikersdata in de state plaatsen
-        toggleIsAuth({
-            ...isAuth,
-            isAuth: true,
-            user: {
-                email: decodedToken.email,
-                id: decodedToken.sub,
-            }
-        });
-
-        // console.log(isAuth.user);
         console.log(`Je bent ingelogd!`)
-        history.push("/profile");
     }
 
     //4. Data maken die voor iedereen beschikbaar is
     const contextAuth = {
         isAuth: isAuth.isAuth,
-        user: isAuth.user.email,
+        email: isAuth.user.email,
+        username: isAuth.user.username,
         logIn: logIn,
         logOut: logOut,
     }
