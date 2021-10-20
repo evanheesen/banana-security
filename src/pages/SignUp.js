@@ -5,7 +5,7 @@ import axios from "axios";
 
 function SignUp() {
 
-    const {register, handleSubmit} = useForm();
+    const {register, handleSubmit, formState: {errors}} = useForm();
     const history = useHistory();
     const source = axios.CancelToken.source();
 
@@ -50,8 +50,16 @@ function SignUp() {
                             className="inputField"
                             type="email"
                             id="email"
-                            {...register("email")}
+                            {...register("email", {
+                                required: "Emailadres invullen is  verplicht",
+                                minLength: {
+                                    value: 6,
+                                    message: "Het emailadres moet minimaal minstens 6 tekens bevatten",
+                                }
+                                },
+                            )}
                         />
+                    {errors.email && <p className="error-text">{errors.email.message}</p> }
                     </label>
                     <label htmlFor="username">
                         Gebruikersnaam:
